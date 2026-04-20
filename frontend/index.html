@@ -53,18 +53,11 @@
         width: 34px;
         height: 18px;
       }
-      .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
+      .switch input { opacity: 0; width: 0; height: 0; }
       .slider {
         position: absolute;
         cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top: 0; left: 0; right: 0; bottom: 0;
         background-color: #cbd5e1;
         transition: 0.4s;
         border-radius: 34px;
@@ -72,44 +65,39 @@
       .slider:before {
         position: absolute;
         content: "";
-        height: 12px;
-        width: 12px;
-        left: 3px;
-        bottom: 3px;
+        height: 12px; width: 12px;
+        left: 3px; bottom: 3px;
         background-color: white;
         transition: 0.4s;
         border-radius: 50%;
       }
-      input:checked + .slider {
-        background-color: #818cf8;
-      }
-      input:checked + .slider:before {
-        transform: translateX(16px);
-      }
+      input:checked + .slider { background-color: #818cf8; }
+      input:checked + .slider:before { transform: translateX(16px); }
 
       .ai-bubble {
         background: var(--ai-bubble);
         border: 1px solid var(--border-color);
       }
-      .user-bubble {
+      .user-bubble { background: #818cf8; color: white; }
+
+      .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+      .typing-dot {
+        display: inline-block;
+        width: 6px; height: 6px;
+        border-radius: 50%;
         background: #818cf8;
-        color: white;
+        animation: typing 1.2s infinite;
       }
-
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-      }
-
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+      .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+      .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+      @keyframes typing {
+        0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+        40% { opacity: 1; transform: scale(1); }
       }
     </style>
   </head>
@@ -133,15 +121,11 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <aside class="lg:col-span-4 space-y-6">
           <div class="soft-glass p-6">
-            <h3
-              class="text-[10px] font-bold opacity-50 uppercase tracking-widest mb-6 font-semibold"
-            >
+            <h3 class="text-[10px] font-bold opacity-50 uppercase tracking-widest mb-6 font-semibold">
               AYARLAR & VERİ
             </h3>
 
-            <div
-              class="flex items-center justify-between p-3 bg-indigo-500/5 rounded-xl border border-indigo-500/10 mb-6"
-            >
+            <div class="flex items-center justify-between p-3 bg-indigo-500/5 rounded-xl border border-indigo-500/10 mb-6">
               <span class="text-xs font-medium">Kaynakları Göster</span>
               <label class="switch">
                 <input type="checkbox" id="citeToggle" checked />
@@ -150,24 +134,16 @@
             </div>
 
             <label
+              id="uploadLabel"
               class="group relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-indigo-400 transition-all"
             >
               <i class="fas fa-cloud-upload-alt text-indigo-400 text-xl"></i>
-              <p class="text-[11px] font-medium opacity-70">Doküman Yükle</p>
-              <input
-                type="file"
-                id="fileInput"
-                class="hidden"
-                multiple
-                accept=".pdf,.docx,.txt"
-              />
+              <p class="text-[11px] font-medium opacity-70" id="uploadText">Doküman Yükle</p>
+              <input type="file" id="fileInput" class="hidden" multiple accept=".pdf,.docx,.txt,.doc" />
             </label>
 
             <div id="fileDisplayList" class="mt-4 space-y-2">
-              <p
-                id="noFileText"
-                class="text-[10px] opacity-50 text-center italic"
-              >
+              <p id="noFileText" class="text-[10px] opacity-50 text-center italic">
                 Henüz dosya seçilmedi.
               </p>
             </div>
@@ -176,55 +152,31 @@
 
         <main class="lg:col-span-8">
           <div class="soft-glass h-[650px] flex flex-col overflow-hidden">
-            <div
-              id="chatBox"
-              class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar"
-            >
+            <div id="chatBox" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
               <div class="flex items-start gap-3">
-                <div
-                  class="w-8 h-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center text-xs"
-                >
+                <div class="w-8 h-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center text-xs">
                   <i class="fas fa-robot"></i>
                 </div>
-                <div
-                  class="ai-bubble p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm shadow-sm"
-                >
-                  Merhaba! Ben Akademi AI. Dokümanlarını yükleyerek analize
-                  başlayabilirsin.
+                <div class="ai-bubble p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm shadow-sm">
+                  Merhaba! Ben Akademi AI. Dokümanlarını yükleyerek analize başlayabilirsin.
                 </div>
               </div>
             </div>
 
             <div class="p-6 bg-slate-500/5 border-t border-slate-500/10">
-              <div
-                class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar scroll-smooth"
-              >
+              <div class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar scroll-smooth">
                 <button
-                  onclick="
-                    quickAction(
-                      'Yüklediğim dokümanların genel bir özetini çıkar',
-                    )
-                  "
+                  onclick="quickAction('Yüklediğim dokümanların genel bir özetini çıkar')"
                   class="whitespace-nowrap px-4 py-1.5 rounded-full bg-[var(--input-bg)] border border-slate-500/20 text-[10px] font-medium hover:border-indigo-400 hover:text-indigo-400 transition-all shadow-sm"
-                >
-                  📄 Özet Çıkar
-                </button>
+                >📄 Özet Çıkar</button>
                 <button
                   onclick="quickAction('En önemli 5 anahtar noktayı listele')"
                   class="whitespace-nowrap px-4 py-1.5 rounded-full bg-[var(--input-bg)] border border-slate-500/20 text-[10px] font-medium hover:border-indigo-400 hover:text-indigo-400 transition-all shadow-sm"
-                >
-                  🔑 Anahtar Noktalar
-                </button>
+                >🔑 Anahtar Noktalar</button>
                 <button
-                  onclick="
-                    quickAction(
-                      'Dokümanlar arasındaki benzerlik ve farklar neler?',
-                    )
-                  "
+                  onclick="quickAction('Dokümanlar arasındaki benzerlik ve farklar neler?')"
                   class="whitespace-nowrap px-4 py-1.5 rounded-full bg-[var(--input-bg)] border border-slate-500/20 text-[10px] font-medium hover:border-indigo-400 hover:text-indigo-400 transition-all shadow-sm"
-                >
-                  💡 Karşılaştır
-                </button>
+                >💡 Karşılaştır</button>
               </div>
 
               <form id="chatForm" class="relative">
@@ -236,6 +188,7 @@
                 />
                 <button
                   type="submit"
+                  id="sendBtn"
                   class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center hover:scale-105 transition-transform"
                 >
                   <i class="fas fa-paper-plane text-xs"></i>
@@ -248,97 +201,170 @@
     </div>
 
     <script>
-      // Dark Mode Logic
-      const darkToggle = document.getElementById("darkToggle");
-      const body = document.body;
-      const icon = darkToggle.querySelector("i");
+      const API = "http://127.0.0.1:8000";
 
+      // ── Dark Mode ──────────────────────────────────────────────
+      const darkToggle = document.getElementById("darkToggle");
+      const icon = darkToggle.querySelector("i");
       if (localStorage.getItem("theme") === "dark") {
-        body.classList.add("dark");
+        document.body.classList.add("dark");
         icon.classList.replace("fa-moon", "fa-sun");
       }
-
       darkToggle.addEventListener("click", () => {
-        body.classList.toggle("dark");
-        if (body.classList.contains("dark")) {
-          icon.classList.replace("fa-moon", "fa-sun");
-          localStorage.setItem("theme", "dark");
-        } else {
-          icon.classList.replace("fa-sun", "fa-moon");
-          localStorage.setItem("theme", "light");
-        }
+        document.body.classList.toggle("dark");
+        const isDark = document.body.classList.contains("dark");
+        icon.classList.replace(isDark ? "fa-moon" : "fa-sun", isDark ? "fa-sun" : "fa-moon");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
       });
 
-      // Chat & File Logic
-      const fileInput = document.getElementById("fileInput");
+      // ── Elemanlar ─────────────────────────────────────────────
+      const fileInput      = document.getElementById("fileInput");
       const fileDisplayList = document.getElementById("fileDisplayList");
-      const chatBox = document.getElementById("chatBox");
-      const chatForm = document.getElementById("chatForm");
-      const userInput = document.getElementById("userInput");
-      const citeToggle = document.getElementById("citeToggle");
+      const chatBox        = document.getElementById("chatBox");
+      const chatForm       = document.getElementById("chatForm");
+      const userInput      = document.getElementById("userInput");
+      const citeToggle     = document.getElementById("citeToggle");
+      const sendBtn        = document.getElementById("sendBtn");
+      const uploadText     = document.getElementById("uploadText");
 
-      let uploadedFiles = [];
-
-      fileInput.addEventListener("change", (e) => {
+      // ── Dosya Yükleme → Backend'e POST /upload ────────────────
+      fileInput.addEventListener("change", async (e) => {
         const files = Array.from(e.target.files);
-        if (files.length > 0) {
+        if (!files.length) return;
+
+        uploadText.textContent = "Yükleniyor...";
+
+        const formData = new FormData();
+        files.forEach(f => formData.append("files", f));
+
+        try {
+          const res = await fetch(`${API}/upload`, {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+
           document.getElementById("noFileText").classList.add("hidden");
-          files.forEach((file) => {
-            uploadedFiles.push(file.name);
+
+          data.results.forEach(r => {
             const item = document.createElement("div");
-            item.className =
-              "flex items-center gap-2 p-2 bg-indigo-500/5 rounded-lg border border-indigo-500/10 text-[10px] animate-fade-in";
-            item.innerHTML = `<i class="fas fa-check-circle text-green-500"></i> <span class="truncate">${file.name}</span>`;
+            const ok = r.status === "ok";
+            item.className = "flex items-center gap-2 p-2 bg-indigo-500/5 rounded-lg border border-indigo-500/10 text-[10px]";
+            item.innerHTML = `
+              <i class="fas ${ok ? "fa-check-circle text-green-500" : "fa-times-circle text-red-400"}"></i>
+              <span class="truncate">${r.filename}</span>
+              ${ok ? `<span class="ml-auto opacity-50">${r.chunks} chunk</span>` : `<span class="ml-auto text-red-400">${r.detail}</span>`}
+            `;
             fileDisplayList.appendChild(item);
           });
+
+          uploadText.textContent = "Doküman Yükle";
+        } catch (err) {
+          uploadText.textContent = "Hata! Tekrar dene";
+          console.error(err);
         }
       });
 
-      function quickAction(text) {
-        userInput.value = text;
-        chatForm.dispatchEvent(new Event("submit"));
-      }
-
-      chatForm.addEventListener("submit", (e) => {
+      // ── Sohbet → Backend'e POST /chat ─────────────────────────
+      chatForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const val = userInput.value.trim();
         if (!val) return;
 
         appendMsg("user", val);
         userInput.value = "";
+        sendBtn.disabled = true;
 
-        // AI Yazıyor Simülasyonu
-        setTimeout(() => {
-          let response =
-            uploadedFiles.length > 0
-              ? `"${val}" sorgusu için dokümanları taradım. RAG mimarisi üzerinden ilgili verileri analiz ediyorum...`
-              : "Lütfen analiz yapabilmem için bir dosya yükleyin.";
-          let sourceHtml =
-            citeToggle.checked && uploadedFiles.length > 0
-              ? `<div class="mt-3 pt-2 border-t border-slate-500/10 text-[9px] font-bold text-indigo-400 uppercase tracking-tighter">
-                        <i class="fas fa-link mr-1"></i> KAYNAK: ${uploadedFiles[0]}
-                    </div>`
-              : "";
+        // Yazıyor göstergesi
+        const typingId = showTyping();
 
-          appendMsg("ai", response, sourceHtml);
-        }, 800);
+        try {
+          const res = await fetch(`${API}/chat`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: val,
+              show_sources: citeToggle.checked,
+            }),
+          });
+
+          removeTyping(typingId);
+
+          if (!res.ok) {
+            const err = await res.json();
+            appendMsg("ai", `⚠️ ${err.detail || "Bir hata oluştu."}`);
+            return;
+          }
+
+          const data = await res.json();
+
+          // Kaynak HTML'i oluştur
+          let sourceHtml = "";
+          if (citeToggle.checked && data.sources && data.sources.length > 0) {
+            const sourceList = data.sources.map(s =>
+              `<span class="inline-block px-2 py-0.5 bg-indigo-500/10 rounded-md">${s}</span>`
+            ).join(" ");
+            sourceHtml = `
+              <div class="mt-3 pt-2 border-t border-slate-500/10 text-[9px] font-bold text-indigo-400 uppercase tracking-tighter flex flex-wrap gap-1 items-center">
+                <i class="fas fa-link mr-1"></i> KAYNAK: ${sourceList}
+              </div>`;
+          }
+
+          appendMsg("ai", data.answer, sourceHtml);
+
+        } catch (err) {
+          removeTyping(typingId);
+          appendMsg("ai", "⚠️ Sunucuya bağlanılamadı. Backend çalışıyor mu?");
+          console.error(err);
+        } finally {
+          sendBtn.disabled = false;
+        }
       });
+
+      // ── Yardımcılar ───────────────────────────────────────────
+      function quickAction(text) {
+        userInput.value = text;
+        chatForm.dispatchEvent(new Event("submit"));
+      }
 
       function appendMsg(type, text, extra = "") {
         const div = document.createElement("div");
-        div.className =
-          type === "ai"
-            ? "flex items-start gap-3"
-            : "flex items-start gap-3 flex-row-reverse";
+        div.className = type === "ai"
+          ? "flex items-start gap-3"
+          : "flex items-start gap-3 flex-row-reverse";
         div.innerHTML = `
-                <div class="w-8 h-8 rounded-lg ${type === "ai" ? "bg-indigo-500 shadow-lg shadow-indigo-500/20" : "bg-slate-500/20"} text-white flex items-center justify-center text-xs flex-shrink-0">
-                    <i class="fas ${type === "ai" ? "fa-robot" : "fa-user text-slate-400"}"></i>
-                </div>
-                <div class="${type === "ai" ? "ai-bubble" : "user-bubble"} p-4 rounded-2xl ${type === "ai" ? "rounded-tl-none" : "rounded-tr-none"} max-w-[85%] text-sm shadow-sm transition-all">
-                    <p class="opacity-90 leading-relaxed">${text}</p>${extra}
-                </div>`;
+          <div class="w-8 h-8 rounded-lg ${type === "ai" ? "bg-indigo-500 shadow-lg shadow-indigo-500/20" : "bg-slate-500/20"} text-white flex items-center justify-center text-xs flex-shrink-0">
+            <i class="fas ${type === "ai" ? "fa-robot" : "fa-user text-slate-400"}"></i>
+          </div>
+          <div class="${type === "ai" ? "ai-bubble" : "user-bubble"} p-4 rounded-2xl ${type === "ai" ? "rounded-tl-none" : "rounded-tr-none"} max-w-[85%] text-sm shadow-sm transition-all">
+            <p class="opacity-90 leading-relaxed whitespace-pre-wrap">${text}</p>${extra}
+          </div>`;
         chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      function showTyping() {
+        const id = "typing-" + Date.now();
+        const div = document.createElement("div");
+        div.id = id;
+        div.className = "flex items-start gap-3";
+        div.innerHTML = `
+          <div class="w-8 h-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center text-xs flex-shrink-0">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="ai-bubble p-4 rounded-2xl rounded-tl-none text-sm shadow-sm flex gap-1 items-center">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return id;
+      }
+
+      function removeTyping(id) {
+        const el = document.getElementById(id);
+        if (el) el.remove();
       }
     </script>
   </body>
