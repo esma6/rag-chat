@@ -10,7 +10,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -185,13 +185,12 @@ def toggle_file(filename: str):
 
 # ------------------------------------------------------------------
 # CHAT (🔥 FINAL FIXED LOGIC)
-@app.post("/chat", response_model=ChatResponse)
-def chat(req: ChatRequest):
+@app.post("/chat/stream")
+def chat_stream(req: ChatRequest):
 
     if state["index"] is None:
         raise HTTPException(400, "No documents uploaded")
 
-    # 🔥 AKTİF DOSYA FİLTRE
     if req.active_files:
         active_metadata = [
             m for m in state["metadata"]
@@ -200,14 +199,11 @@ def chat(req: ChatRequest):
     else:
         active_metadata = state["metadata"]
 
-    # ❌ BOŞSA DUR
     if len(active_metadata) == 0:
-        return ChatResponse(
-            answer="📭 Yüklenmiş aktif dosya yok.",
-            sources=[]
-        )
+        def empty():
+            yield "📭 Yüklenmiş aktif dosya yok."
+        return StreamingResponse(empty(), media_type="text/plain")
 
-    # 🔥 BURASI EKSİK OLAN KISIMDI
     relevant = search_index(
         index=state["index"],
         query=req.message,
@@ -215,14 +211,39 @@ def chat(req: ChatRequest):
         k=5,
     )
 
-    answer = generate_answer(req.message, relevant)
+    context = "\n\n---\n\n".join([c["content"] for c in relevant])
+    prompt = f"""
+Aşağıdaki bağlamı kullanarak cevap ver.
 
-    sources = list({r["source"] for r in relevant}) if req.show_sources else []
+BAĞLAM:
+{context}
 
-    return ChatResponse(
-        answer=answer,
-        sources=sources
-    )
+SORU:
+{req.message}
+
+CEVAP:
+"""
+
+    def stream_generator():
+        model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+        response = state["groq_client"].chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=1024,
+            stream=True,
+        )
+        
+        for chunk in response:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield delta
+        
+        if req.show_sources:
+            sources = list({m["source"] for m in relevant})
+            yield f"\n__SOURCES__:{','.join(sources)}"
+
+    return StreamingResponse(stream_generator(), media_type="text/plain")
 
 # ------------------------------------------------------------------
 # HEALTH

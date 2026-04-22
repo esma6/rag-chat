@@ -164,6 +164,7 @@ function toggle(i){
 }
 
 /* ---------------- CHAT ---------------- */
+/* ---------------- CHAT ---------------- */
 document.getElementById("form").onsubmit = async (e) => {
   e.preventDefault();
 
@@ -175,7 +176,18 @@ document.getElementById("form").onsubmit = async (e) => {
 
   addMessage("user", msg);
 
-  const res = await fetch(API + "/chat", {
+  // Boş AI balonu oluştur
+  const chatDiv = document.getElementById("chat");
+  const wrapper = document.createElement("div");
+  wrapper.className = "text-left";
+  const bubble = document.createElement("div");
+  bubble.className = "inline-block p-3 rounded-xl border max-w-[80%] bg-white/70";
+  bubble.innerText = "⏳";
+  wrapper.appendChild(bubble);
+  chatDiv.appendChild(wrapper);
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+
+  const res = await fetch(API + "/chat/stream", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({
@@ -185,21 +197,50 @@ document.getElementById("form").onsubmit = async (e) => {
     })
   });
 
-  const data = await res.json();
-  console.log("CHAT:", data);
+const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let fullText = "";
+  let buffer = "";
 
-  let src = "";
-  if (showSources && data.sources?.length) {
-    src = `
-      <div class="text-xs mt-2 opacity-60">
-        📚 ${data.sources.map(s =>
-          `<span class="px-2 py-1 border rounded">${s}</span>`
-        ).join(" ")}
-      </div>
-    `;
+  bubble.innerText = "";
+
+while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      const remaining = fullText + buffer;
+      if (remaining.includes("__SOURCES__:")) {
+        const parts = remaining.split("__SOURCES__:");
+        bubble.innerText = parts[0].trim();
+        if (showSources && parts[1]) {
+          const sources = parts[1].trim().split(",");
+          const srcDiv = document.createElement("div");
+          srcDiv.className = "text-xs mt-2 opacity-60";
+          srcDiv.innerHTML = "📚 " + sources.map(s =>
+            `<span class="px-2 py-1 border rounded">${s.trim()}</span>`
+          ).join(" ");
+          wrapper.appendChild(srcDiv);
+        }
+      } else {
+        bubble.innerText = remaining;
+      }
+      break;
+    }
+
+    buffer += decoder.decode(value);
+
+    if (buffer.includes("__SOURCES__:")) {
+      fullText += buffer;
+      break;
+    }
+
+    if (buffer.includes(" ") || buffer.includes("\n")) {
+      fullText += buffer;
+      bubble.innerText = fullText;
+      buffer = "";
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+      await new Promise(r => setTimeout(r, 60));
+    }
   }
-
-  addMessage("ai", data.answer + src);
 };
 
 /* ---------------- CHAT UI ---------------- */
