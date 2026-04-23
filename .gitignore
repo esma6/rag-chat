@@ -1,6 +1,7 @@
 .env
-uploads/
+.idea/
+.DS_Store
+backend/uploads/
 __pycache__/
-*.pyc
-.venv/
 venv/
+.venv

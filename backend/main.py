@@ -270,6 +270,78 @@ if FRONTEND_DIR.exists():
 # ------------------------------------------------------------------
 # RUN
 # ------------------------------------------------------------------
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+@app.get("/preview")
+def preview(filename: str):
+    # 1. Dosyanın varlığını kontrol et
+    # Backend'de dosyalar "uuid_filename.ext" formatında saklanıyor olabilir
+    target_file = None
+    for file_path in UPLOAD_DIR.glob("*"):
+        if file_path.name.endswith(filename):
+            target_file = file_path
+            break
+
+    if not target_file:
+        print(f"Hata: {filename} dosyası bulunamadı. Mevcut dosyalar: {os.listdir(UPLOAD_DIR)}")
+        raise HTTPException(status_code=404, detail=f"Dosya bulunamadı: {filename}")
+
+    try:
+        # 2. Dosyayı oku
+        content = load_file(str(target_file))
+
+        if not content or content.strip() == "":
+            return {"content": "[Boş Doküman] Bu dosyanın içeriği boş veya metne çevrilemedi."}
+
+        return {"content": content}
+    except Exception as e:
+        print(f"Okuma Hatası: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Dosya okuma hatası: {str(e)}")
+from fastapi.responses import FileResponse
+
+
+# ------------------------------------------------------------------
+# PDF GÖRÜNTÜLEME (IFRAME DESTEĞİ)
+# ------------------------------------------------------------------
+@app.get("/get_pdf/{filename}")
+def get_pdf(filename: str):
+    # Backend'deki uploads klasöründe ilgili dosyayı bulur
+    target_file = None
+    for file_path in UPLOAD_DIR.glob("*"):
+        if file_path.name.endswith(filename):
+            target_file = file_path
+            break
+
+    if not target_file:
+        raise HTTPException(status_code=404, detail="Dosya bulunamadı")
+
+    # Tarayıcının dosyayı indirmek yerine "görüntülemesini" sağlar
+    return FileResponse(
+        path=target_file,
+        media_type='application/pdf',
+        headers={"Content-Disposition": "inline"}  # Bu satır kritik!
+    )
+
+@app.get("/get_pdf/{filename}")
+def get_pdf(filename: str):
+    for file_path in UPLOAD_DIR.glob("*"):
+        if file_path.name.endswith(filename):
+            # Dosyayı tarayıcıda açılacak şekilde gönder
+            return FileResponse(path=file_path, media_type='application/pdf')
+    raise HTTPException(404, "Dosya bulunamadı")
+
+@app.post("/remove_file")
+def remove_file(filename: str):
+    # 1. Bellekten (Metadata) temizle
+    state["metadata"] = [m for m in state["metadata"] if m["source"] != filename]
+
+    # 2. Aktif dosya listesinden çıkar
+    if filename in state["files"]:
+        del state["files"][filename]
+
+    # 3. Diskteki fiziksel dosyayı sil
+    for file_path in UPLOAD_DIR.glob("*"):
+        if file_path.name.endswith(filename):
+            try:
+                os.remove(file_path)
+            except:
+                pass
+    return {"status": "ok", "filename": filename}
