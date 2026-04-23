@@ -222,10 +222,14 @@
 
             // KONTROL: Aktif dosya var mı?
             const activeCount = files.filter(f => f.active).length;
-            if (activeCount === 0) {
-                alert("Lütfen önce bir doküman yükleyin.");
-                return;
-            }
+           if (activeCount === 0) {
+    document.getElementById("welcome")?.remove();
+
+    const aiBubble = addAI();
+    aiBubble.innerText = "Şu an analiz edebileceğim bir doküman yok 📄\n\nLütfen önce bir dosya yükleyin.";
+
+    return;
+}
 
             document.getElementById("welcome")?.remove();
             inp.value = ""; addUser(msg);
