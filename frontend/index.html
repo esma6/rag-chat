@@ -1,269 +1,551 @@
 <!doctype html>
-<html lang="tr">
+<html lang="tr" data-theme="light">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Akademi AI RAG Chat</title>
+<title>Akademi AI</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
 
 <style>
+[data-theme="light"] {
+  --bg:       #fafaf9;
+  --surface:  #ffffff;
+  --border:   #e7e5e4;
+  --border2:  #d6d3d1;
+  --text:     #1c1917;
+  --text2:    #57534e;
+  --text3:    #a8a29e;
+  --accent:   #0f766e;
+  --accent-bg:#f0fdfa;
+  --user-bg:  #1c1917;
+  --user-text:#fafaf9;
+  --tag-bg:   #f5f5f4;
+}
+
+[data-theme="dark"] {
+  --bg:       #111110;
+  --surface:  #1c1917;
+  --border:   #292524;
+  --border2:  #44403c;
+  --text:     #fafaf9;
+  --text2:    #a8a29e;
+  --text3:    #57534e;
+  --accent:   #2dd4bf;
+  --accent-bg:#042f2e;
+  --user-bg:  #fafaf9;
+  --user-text:#1c1917;
+  --tag-bg:   #292524;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: Inter;
-  background: linear-gradient(135deg,#f8fafc,#eef2f7);
+  font-family: 'Geist', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background .2s, color .2s;
 }
 
-.card {
-  background: rgba(255,255,255,0.75);
-  backdrop-filter: blur(10px);
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
+/* HEADER */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 52px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
 }
 
-.file-btn {
-  width: 28px;
-  height: 28px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid #e2e8f0;
-  border-radius:8px;
-  transition:.2s;
+.logo { display: flex; align-items: baseline; gap: 8px; }
+
+.logo-name {
+  font-family: 'Instrument Serif', serif;
+  font-size: 18px;
+  color: var(--text);
+  letter-spacing: -.2px;
+}
+.logo-name em { font-style: italic; color: var(--accent); }
+
+.logo-tag {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: .04em;
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
 }
 
-.file-btn:hover {
-  transform: scale(1.1);
-  border-color:#6366f1;
+.header-actions { display: flex; gap: 6px; align-items: center; }
+
+.hbtn {
+  height: 30px;
+  padding: 0 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text2);
+  font-family: 'Geist', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all .15s;
+  white-space: nowrap;
 }
+.hbtn:hover { background: var(--tag-bg); color: var(--text); border-color: var(--border2); }
+.hbtn.on { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+
+/* LAYOUT */
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+/* SIDEBAR */
+.sidebar {
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.sidebar-section {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+
+.upload-area {
+  border: 1px dashed var(--border2);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+.upload-area:hover { border-color: var(--accent); background: var(--accent-bg); }
+.upload-area input { display: none; }
+.upload-area p { font-size: 12px; color: var(--text2); margin-top: 6px; }
+.upload-area p span { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--text3); display: block; margin-top: 2px; }
+
+.file-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.file-list::-webkit-scrollbar { width: 3px; }
+.file-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 7px;
+  transition: background .12s;
+}
+.file-row:hover { background: var(--tag-bg); }
+.file-row.off { opacity: .4; }
+
+.file-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.file-row.off .file-dot { background: var(--border2); }
+
+.file-name { flex: 1; font-size: 12px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-ext { font-family: 'Geist Mono', monospace; font-size: 9px; color: var(--text3); flex-shrink: 0; }
+
+.ftoggle {
+  width: 22px; height: 22px;
+  background: none; border: none; border-radius: 4px;
+  color: var(--text3); cursor: pointer; font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s; flex-shrink: 0;
+}
+.ftoggle:hover { background: var(--border); color: var(--text); }
+
+.sc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+
+.sc {
+  padding: 8px 10px;
+  background: var(--tag-bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 11px;
+  color: var(--text2);
+  cursor: pointer;
+  text-align: left;
+  transition: all .12s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Geist', sans-serif;
+}
+.sc:hover { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+
+/* CHAT */
+.chat-area { display: flex; flex-direction: column; background: var(--bg); min-height: 0; }
+
+#chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+#chat::-webkit-scrollbar { width: 3px; }
+#chat::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.welcome { margin: auto; text-align: center; max-width: 320px; }
+.welcome-title { font-family: 'Instrument Serif', serif; font-size: 26px; color: var(--text); margin-bottom: 8px; }
+.welcome-title em { font-style: italic; color: var(--accent); }
+.welcome-body { font-size: 13px; color: var(--text3); line-height: 1.6; }
+
+.msg { display: flex; gap: 12px; max-width: 720px; animation: up .2s ease; }
+@keyframes up { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-body { display: flex; flex-direction: column; gap: 4px; }
+
+.bubble { padding: 10px 14px; border-radius: 10px; font-size: 13.5px; line-height: 1.65; white-space: pre-wrap; }
+.msg.ai .bubble { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 3px 10px 10px 10px; }
+.msg.user .bubble { background: var(--user-bg); color: var(--user-text); border-radius: 10px 3px 10px 10px; }
+
+.msg-time { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--text3); padding: 0 2px; }
+.msg.user .msg-time { text-align: right; }
+
+.sources { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.src-tag { font-family: 'Geist Mono', monospace; font-size: 10px; padding: 3px 8px; background: var(--tag-bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text3); }
+
+.typing { display: flex; gap: 4px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 3px 10px 10px 10px; width: fit-content; }
+.typing span { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); animation: blink .9s ease-in-out infinite; }
+.typing span:nth-child(2) { animation-delay: .18s; }
+.typing span:nth-child(3) { animation-delay: .36s; }
+@keyframes blink { 0%,100% { opacity:.3; transform:translateY(0); } 50% { opacity:1; transform:translateY(-3px); } }
+
+/* INPUT */
+.input-bar { padding: 14px 32px 18px; border-top: 1px solid var(--border); background: var(--surface); }
+
+.input-row {
+  display: flex; align-items: flex-end; gap: 8px;
+  background: var(--bg); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 10px 12px;
+  transition: border-color .15s;
+}
+.input-row:focus-within { border-color: var(--accent); }
+
+textarea#input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--text); font-family: 'Geist', sans-serif;
+  font-size: 13.5px; resize: none; line-height: 1.5; max-height: 100px;
+}
+textarea#input::placeholder { color: var(--text3); }
+
+.send {
+  width: 32px; height: 32px;
+  background: var(--text); border: none; border-radius: 7px;
+  color: var(--bg); font-size: 12px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: opacity .15s;
+}
+.send:hover { opacity: .75; }
+
+.input-hint { margin-top: 8px; font-size: 11px; color: var(--text3); text-align: center; font-family: 'Geist Mono', monospace; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--text); color: var(--bg);
+  padding: 8px 16px; border-radius: 7px; font-size: 12px;
+  opacity: 0; transition: all .2s; pointer-events: none; z-index: 100;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
+<body>
 
-<body class="p-6">
+<header>
+  <div class="logo">
+    <div class="logo-name">Akademi <em>AI</em></div>
+    <div class="logo-tag">RAG</div>
+  </div>
+  <div class="header-actions">
+    <button class="hbtn on" id="btnSources"><i class="fas fa-quote-right"></i> Kaynaklar</button>
+    <button class="hbtn" id="btnClear"><i class="fas fa-minus"></i> Temizle</button>
+    <button class="hbtn" id="btnTheme"><i class="fas fa-circle-half-stroke"></i></button>
+  </div>
+</header>
 
-<div class="max-w-6xl mx-auto">
+<div class="layout">
 
-<!-- HEADER -->
-<div class="flex justify-between mb-6">
-  <div>
-    <h1 class="text-2xl font-semibold">Akademi AI</h1>
-    <p class="text-sm opacity-60">RAG Chat System</p>
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="section-label">Dokümanlar</div>
+      <label class="upload-area">
+        <input id="fileInput" type="file" multiple accept=".pdf,.docx,.txt,.doc"/>
+        <i class="fas fa-paperclip" style="color:var(--text3);font-size:16px"></i>
+        <p>Dosya yükle <span>PDF · DOCX · TXT · DOC</span></p>
+      </label>
+    </div>
+
+    <div class="file-list" id="fileList"></div>
+
+    <div class="sidebar-section" style="margin-top:auto;border-top:1px solid var(--border);border-bottom:none">
+      <div class="section-label">Kısayollar</div>
+      <div class="sc-grid">
+        <button class="sc" onclick="shortcut('Bu dokümanı özetle.')">📋 Özet</button>
+        <button class="sc" onclick="shortcut('Ana konular neler?')">🎯 Konular</button>
+        <button class="sc" onclick="shortcut('Önemli terimleri listele.')">📖 Terimler</button>
+        <button class="sc" onclick="shortcut('Bana 5 soru sor.')">❓ Sorular</button>
+        <button class="sc" onclick="shortcut('Sayısal verileri listele.')">📊 Veriler</button>
+        <button class="sc" onclick="shortcut('Sonuç ve önerileri yaz.')">✅ Sonuçlar</button>
+      </div>
+    </div>
   </div>
 
-  <button id="toggleSources" class="px-3 py-1 border rounded-lg text-xs">
-    📚 Kaynakları Göster
-  </button>
-</div>
+  <div class="chat-area">
+    <div id="chat">
+      <div class="welcome" id="welcome">
+        <div class="welcome-title">Merhaba, <em>nasıl yardımcı olabilirim?</em></div>
+        <div class="welcome-body">Bir doküman yükle ve sormak istediğin her şeyi sor — özet, analiz, karşılaştırma.</div>
+      </div>
+    </div>
 
-<div class="grid grid-cols-12 gap-6">
-
-<!-- FILE PANEL -->
-<div class="col-span-4 card p-4">
-
-<label class="block border-dashed border p-4 rounded-xl text-center cursor-pointer">
-📄 Dosya Yükle
-<input id="fileInput" type="file" multiple class="hidden"/>
-</label>
-
-<div id="fileList" class="mt-3 space-y-2 text-xs"></div>
-
-</div>
-
-<!-- CHAT -->
-<div class="col-span-8 card p-4 flex flex-col h-[600px]">
-
-<div id="chat" class="flex-1 overflow-auto space-y-3 text-sm p-2"></div>
-
-<form id="form" class="flex gap-2 mt-3">
-  <input id="input"
-    class="flex-1 border rounded-xl p-3"
-    placeholder="Mesaj yaz..."
-  />
-  <button class="bg-indigo-500 text-white px-4 rounded-xl">
-    Gönder
-  </button>
-</form>
+    <div class="input-bar">
+      <div class="input-row">
+        <textarea id="input" rows="1" placeholder="Bir şey sor..."></textarea>
+        <button class="send" id="sendBtn"><i class="fas fa-arrow-up"></i></button>
+      </div>
+      <div class="input-hint">Enter → gönder &nbsp;·&nbsp; Shift+Enter → yeni satır</div>
+    </div>
+  </div>
 
 </div>
 
-</div>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
-
 const API = "http://127.0.0.1:8000";
-
-/* STATE */
 let files = [];
 let showSources = true;
+let isDark = false;
 
-/* TOGGLE SOURCES */
-document.getElementById("toggleSources").onclick = () => {
-  showSources = !showSources;
-  document.getElementById("toggleSources").innerText =
-    showSources ? "📚 Kaynakları Gizle" : "📚 Kaynakları Göster";
+document.getElementById("btnTheme").onclick = () => {
+  isDark = !isDark;
+  document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
 };
 
-/* ---------------- FILE UPLOAD ---------------- */
-document.getElementById("fileInput").onchange = async (e) => {
+document.getElementById("btnSources").onclick = () => {
+  showSources = !showSources;
+  document.getElementById("btnSources").classList.toggle("on", showSources);
+  toast(showSources ? "Kaynaklar açık" : "Kaynaklar kapalı");
+};
 
+document.getElementById("btnClear").onclick = () => {
+  document.getElementById("chat").innerHTML = `
+    <div class="welcome" id="welcome">
+      <div class="welcome-title">Merhaba, <em>nasıl yardımcı olabilirim?</em></div>
+      <div class="welcome-body">Bir doküman yükle ve sormak istediğin her şeyi sor.</div>
+    </div>`;
+  toast("Temizlendi");
+};
+
+document.getElementById("fileInput").onchange = async (e) => {
   const fd = new FormData();
   [...e.target.files].forEach(f => fd.append("files", f));
-
-  const res = await fetch(API + "/upload", {
-    method: "POST",
-    body: fd
-  });
-
-  const data = await res.json();
-  console.log("UPLOAD:", data);
-
-  if (!data.results) return;
-
-  data.results.forEach(x => {
-    if (x.status === "ok") {
-      files.push({
-        name: x.filename,
-        active: true,
-        chunks: x.chunks
-      });
-    }
-  });
-
-  renderFiles();
+  toast("Yükleniyor...");
+  try {
+    const res = await fetch(API + "/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    if (!data.results) return;
+    data.results.forEach(x => {
+      if (x.status === "ok") files.push({ name: x.filename, active: true, chunks: x.chunks });
+    });
+    renderFiles();
+    toast(data.results.filter(r => r.status === "ok").length + " dosya yüklendi");
+  } catch { toast("Yükleme başarısız"); }
 };
 
-/* ---------------- FILE RENDER ---------------- */
 function renderFiles() {
   const box = document.getElementById("fileList");
   box.innerHTML = "";
-
   files.forEach((f, i) => {
+    const ext = f.name.split(".").pop().toUpperCase();
     const el = document.createElement("div");
-
-    el.className = "flex items-center gap-2 border p-2 rounded-lg";
-
+    el.className = "file-row" + (f.active ? "" : " off");
     el.innerHTML = `
-      <i class="fas fa-file text-gray-500"></i>
-
-      <span class="flex-1 truncate">${f.name}</span>
-
-      <!-- ACTIVE TOGGLE -->
-      <button onclick="toggle(${i})" class="file-btn">
-        <i class="fas ${f.active ? 'fa-eye' : 'fa-eye-slash'}"></i>
-      </button>
-    `;
-
+      <div class="file-dot"></div>
+      <span class="file-name" title="${f.name}">${f.name}</span>
+      <span class="file-ext">${ext}</span>
+      <button class="ftoggle" onclick="toggleFile(${i})">
+        <i class="fas ${f.active ? "fa-eye" : "fa-eye-slash"}"></i>
+      </button>`;
     box.appendChild(el);
   });
 }
 
-function toggle(i){
+function toggleFile(i) {
   files[i].active = !files[i].active;
   renderFiles();
 }
 
-/* ---------------- CHAT ---------------- */
-/* ---------------- CHAT ---------------- */
-document.getElementById("form").onsubmit = async (e) => {
-  e.preventDefault();
-
-  const input = document.getElementById("input");
-  const msg = input.value.trim();
-  if (!msg) return;
-
-  input.value = "";
-
-  addMessage("user", msg);
-
-  // Boş AI balonu oluştur
-  const chatDiv = document.getElementById("chat");
-  const wrapper = document.createElement("div");
-  wrapper.className = "text-left";
-  const bubble = document.createElement("div");
-  bubble.className = "inline-block p-3 rounded-xl border max-w-[80%] bg-white/70";
-  bubble.innerText = "⏳";
-  wrapper.appendChild(bubble);
-  chatDiv.appendChild(wrapper);
-  chatDiv.scrollTop = chatDiv.scrollHeight;
-
-  const res = await fetch(API + "/chat/stream", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      message: msg,
-      show_sources: showSources,
-      active_files: files.filter(f => f.active).map(f => f.name)
-    })
-  });
-
-const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let fullText = "";
-  let buffer = "";
-
-  bubble.innerText = "";
-
-while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      const remaining = fullText + buffer;
-      if (remaining.includes("__SOURCES__:")) {
-        const parts = remaining.split("__SOURCES__:");
-        bubble.innerText = parts[0].trim();
-        if (showSources && parts[1]) {
-          const sources = parts[1].trim().split(",");
-          const srcDiv = document.createElement("div");
-          srcDiv.className = "text-xs mt-2 opacity-60";
-          srcDiv.innerHTML = "📚 " + sources.map(s =>
-            `<span class="px-2 py-1 border rounded">${s.trim()}</span>`
-          ).join(" ");
-          wrapper.appendChild(srcDiv);
-        }
-      } else {
-        bubble.innerText = remaining;
-      }
-      break;
-    }
-
-    buffer += decoder.decode(value);
-
-    if (buffer.includes("__SOURCES__:")) {
-      fullText += buffer;
-      break;
-    }
-
-    if (buffer.includes(" ") || buffer.includes("\n")) {
-      fullText += buffer;
-      bubble.innerText = fullText;
-      buffer = "";
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-      await new Promise(r => setTimeout(r, 60));
-    }
-  }
-};
-
-/* ---------------- CHAT UI ---------------- */
-function addMessage(type, text) {
-  const div = document.createElement("div");
-
-  div.className = type === "user" ? "text-right" : "text-left";
-
-  div.innerHTML = `
-    <div class="inline-block p-3 rounded-xl border max-w-[80%]
-      ${type === "user"
-        ? "bg-indigo-500 text-white"
-        : "bg-white/70"}">
-      ${text}
-    </div>
-  `;
-
-  document.getElementById("chat").appendChild(div);
-  document.getElementById("chat").scrollTop =
-    document.getElementById("chat").scrollHeight;
+function shortcut(text) {
+  document.getElementById("input").value = text;
+  document.getElementById("input").focus();
+  resize();
 }
 
-</script>
+async function send() {
+  const inp = document.getElementById("input");
+  const msg = inp.value.trim();
+  if (!msg) return;
 
+  const w = document.getElementById("welcome");
+  if (w) w.remove();
+
+  inp.value = "";
+  resize();
+
+  addUser(msg);
+  const { row, bubble } = addAI();
+
+  try {
+    const res = await fetch(API + "/chat/stream", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: msg,
+        show_sources: showSources,
+        active_files: files.filter(f => f.active).map(f => f.name)
+      })
+    });
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let full = "", buf = "", started = false;
+
+    bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+
+while (true) {
+  const { done, value } = await reader.read();
+
+  if (done) {
+    const all = full + buf;
+    if (all.includes("__SOURCES__:")) {
+      const idx = all.indexOf("__SOURCES__:");
+      const text = all.slice(0, idx).trim();
+      const src = all.slice(idx + 12).trim();
+      bubble.innerText = text;
+      if (showSources && src) {
+        const div = document.createElement("div");
+        div.className = "sources";
+        div.innerHTML = src.split(",").filter(Boolean).map(s =>
+          `<span class="src-tag">${s.trim()}</span>`
+        ).join("");
+        row.querySelector(".msg-body").appendChild(div);
+      }
+    } else {
+      bubble.innerText = all;
+    }
+    break;
+  }
+
+  buf += decoder.decode(value, { stream: true });
+
+  // __SOURCES__ geldiyse biriktir, done'da işle
+  if (buf.includes("__SOURCES__:")) {
+    full += buf;
+    buf = "";
+    continue;
+  }
+
+  if (buf.includes(" ") || buf.includes("\n")) {
+    if (!started) { bubble.innerText = ""; started = true; }
+    // ekrana yazarken __SOURCES__ öncesini göster
+    const display = (full + buf).split("__SOURCES__:")[0];
+    bubble.innerText = display;
+    full += buf; buf = "";
+    scroll();
+    await new Promise(r => setTimeout(r, 40));
+  }
+}
+
+    addTime(row);
+    scroll();
+  } catch { bubble.innerText = "Bir hata oluştu."; }
+}
+
+function addUser(text) {
+  const chat = document.getElementById("chat");
+  const el = document.createElement("div");
+  el.className = "msg user";
+  el.innerHTML = `<div class="msg-body"><div class="bubble">${esc(text)}</div><div class="msg-time">${now()}</div></div>`;
+  chat.appendChild(el);
+  scroll();
+}
+
+function addAI() {
+  const chat = document.getElementById("chat");
+  const row = document.createElement("div");
+  row.className = "msg ai";
+  const body = document.createElement("div");
+  body.className = "msg-body";
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  body.appendChild(bubble);
+  row.appendChild(body);
+  chat.appendChild(row);
+  scroll();
+  return { row, bubble };
+}
+
+function addTime(row) {
+  const t = document.createElement("div");
+  t.className = "msg-time";
+  t.textContent = now();
+  row.querySelector(".msg-body").appendChild(t);
+}
+
+function scroll() { const c = document.getElementById("chat"); c.scrollTop = c.scrollHeight; }
+function resize() { const t = document.getElementById("input"); t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 100) + "px"; }
+function now() { return new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }); }
+function esc(t) { return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+document.getElementById("sendBtn").onclick = send;
+document.getElementById("input").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+});
+document.getElementById("input").addEventListener("input", resize);
+</script>
 </body>
 </html>
