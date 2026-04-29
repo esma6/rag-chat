@@ -171,4 +171,4 @@ MIT
 
 ## 👤 Geliştiriciler
 
-[esma6](https://github.com/esma6) [ozgegul] (https://github.com/ozgegul) [aysimaErgn] (https://github.com/aysimaErgn)
+[esma6](https://github.com/esma6) [ozgegul](https://github.com/ozgegul) [aysimaErgn](https://github.com/aysimaErgn)
