@@ -211,26 +211,50 @@ def chat_stream(req: ChatRequest):
         k=5,
     )
 
-    context = "\n\n---\n\n".join([c["content"] for c in relevant])
-    prompt = f"""
-Aşağıdaki bağlamı kullanarak cevap ver.
+    # Kaynak bilgisini bağlama dahil et
+    context_parts = []
+    for i, c in enumerate(relevant, 1):
+        context_parts.append(
+            f"[Kaynak {i} - {c['source']}]\n{c['content']}"
+        )
+    context = "\n\n---\n\n".join(context_parts)
 
-BAĞLAM:
+    # PROFESYONEL SYSTEM PROMPT
+    system_prompt = """Sen, kullanıcının yüklediği dokümanları analiz eden uzman bir asistansın.
+
+GÖREVLERIN:
+1. Sadece sana verilen BAĞLAM bilgisini kullanarak cevap ver
+2. Bağlamda olmayan bilgileri ASLA uydurma
+3. Eğer bağlamda cevap yoksa, "Bu bilgi yüklediğiniz dokümanlarda bulunmuyor" de
+4. Cevaplarında hangi kaynaktan bilgi aldığını belirt (örn: "...[Kaynak 1]'e göre...")
+5. Türkçe sorulara Türkçe, İngilizce sorulara İngilizce cevap ver
+6. Cevaplarını yapılandırılmış ve okunabilir şekilde sun (gerekirse madde işaretleri kullan)
+7. Özet istendiğinde ana noktaları vurgula
+8. Sayısal veriler sorulduğunda kesin değerleri ver
+
+YAPMAMAN GEREKENLER:
+- Genel bilgini kullanma, sadece bağlamı kullan
+- Tahminde bulunma
+- Yanıltıcı veya eksik bilgi verme"""
+
+    user_prompt = f"""BAĞLAM:
 {context}
 
-SORU:
-{req.message}
+SORU: {req.message}
 
-CEVAP:
-"""
+Yukarıdaki bağlamı kullanarak soruyu cevapla. Hangi kaynaktan bilgi aldığını belirtmeyi unutma."""
 
     def stream_generator():
         model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
         response = state["groq_client"].chat.completions.create(
             model=model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-            max_tokens=1024,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.1,
+            max_tokens=2048,
+            top_p=0.9,
             stream=True,
         )
         
@@ -244,7 +268,6 @@ CEVAP:
             yield f"\n__SOURCES__:{','.join(sources)}"
 
     return StreamingResponse(stream_generator(), media_type="text/plain")
-
 # ------------------------------------------------------------------
 # HEALTH
 # ------------------------------------------------------------------
@@ -258,7 +281,10 @@ def health():
 # ------------------------------------------------------------------
 # FRONTEND
 # ------------------------------------------------------------------
-FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
+# Docker'da /frontend, lokal'de ../frontend
+DOCKER_FRONTEND = Path("/frontend")
+LOCAL_FRONTEND = Path(__file__).parent.parent / "frontend"
+FRONTEND_DIR = DOCKER_FRONTEND if DOCKER_FRONTEND.exists() else LOCAL_FRONTEND
 
 if FRONTEND_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")

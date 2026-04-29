@@ -1,7 +1,42 @@
-.env
-.idea/
-.DS_Store
-backend/uploads/
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.pytest_cache/
+
+# Sanal ortam
 venv/
-.venv
+env/
+ENV/
+
+# Ortam değişkenleri (API anahtarları!)
+.env
+.env.local
+*.env
+
+# Yüklenen dosyalar
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.log
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Cache
+metadata.json

@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: rag-chat-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Yüklenen dosyaların container dışında kalıcı olması için
+      - ./backend/uploads:/app/uploads
+      # Frontend dosyalarına erişim için
+      - ./frontend:/frontend
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
